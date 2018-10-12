@@ -6,6 +6,8 @@
 	&__messages-area{
 		height: 80%;
 		overflow-y: auto;
+		overflow-x: hidden;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	&__input-area{
@@ -39,6 +41,36 @@
 				}
 			}
 		}
+	}
+
+	&__notifier{
+		text-align: center;
+	}
+
+	&__notifier-inner{
+	    color: #fff;
+	    font-size: 14px;
+	    padding: 25px 0;
+        display: inline-block;
+	    position: relative;
+
+	    @mixin notifier-pseudo { 
+	    	content: ' ';
+		    position: absolute;
+		    width: 100vw;
+		    height: 1px;
+		    background-color: #fff;
+		    top: 50%;
+	    }
+
+	    &:before{
+	    	@include notifier-pseudo;
+		    left: 105%;
+	    }
+	    &:after{
+	    	@include notifier-pseudo;
+		    right: 105%;
+	    }
 	}
 	
 	&__baloon{

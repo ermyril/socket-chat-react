@@ -4,10 +4,11 @@ import ReactDOM from 'react-dom';
 export default class MessageForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {value: ''};
+    this.state = {value: '', typing: false};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleTyping = this.handleTyping.bind(this);
   }
 
   handleChange(event) {
@@ -38,11 +39,34 @@ export default class MessageForm extends React.Component {
     event.preventDefault();
   }
 
+  handleTyping(){
+      console.log('keypress');
+
+      if (!this.state.typing) {
+        this.props.socket.emit('typing', this.props.nickname);
+      }
+
+      let typingTimeout = setTimeout(() => {  
+        console.log('cleared');
+        this.setState({
+          'typing': false
+        });
+        this.props.socket.emit('done typing', this.props.nickname);
+      }, 3000);
+
+      clearTimeout(this.state.typingClock);
+
+      this.setState({
+        typingClock: typingTimeout,
+        'typing': true
+      });
+  }
+
   render() {
     return (
       <div>
   	    <form onSubmit={this.handleSubmit} className="chat__input-area">
-  				<textarea className="textarea" value={this.state.value} onChange={this.handleChange} placeholder="Напишите сообщение..."></textarea>
+  				<textarea className="textarea" value={this.state.value} onChange={this.handleChange} onKeyDown={this.handleTyping} placeholder="Напишите сообщение..."></textarea>
   				<button type="submit" className="button">Отправить</button>
   			</form>	
   		</div>

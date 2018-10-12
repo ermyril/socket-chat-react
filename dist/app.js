@@ -120053,6 +120053,21 @@ function recieveMessage(callback) {
 	});
 }
 
+function welcomeUser(callback) {
+	socket.on('user joined', function (nickname) {
+		return callback(null, nickname);
+	});
+}
+
+// function showTyping(callback){
+// 	socket.on('user typing', nickname => callback(null, nickname));
+// }
+
+// function hideTyping(callback){
+// 	socket.on('user done typing', nickname => callback(null, nickname));
+// }
+
+
 var Chat = function (_React$Component) {
 	_inherits(Chat, _React$Component);
 
@@ -120067,8 +120082,17 @@ var Chat = function (_React$Component) {
 			socket: __WEBPACK_IMPORTED_MODULE_0_socket_io_client___default()(),
 			nickname: __WEBPACK_IMPORTED_MODULE_3_faker___default.a.name.firstName() + ' ' + __WEBPACK_IMPORTED_MODULE_3_faker___default.a.name.lastName(),
 			avatar: 'https://placekitten.com/100/100?image=' + randomKitten,
-			messages: []
-		};
+			typists: [],
+			messages: [
+				// {nickname: "Adela Corwin", avatar: "https://placekitten.com/100/100?image=0", message: "Tkjak fdjkaf jsdk ", time: "4:00"},
+				// {joined: "Micaela Rodriguez"},
+				// {nickname: "Adela Corwin", avatar: "https://placekitten.com/100/100?image=0", message: "Tkjak fdjkaf jsdk ", time: "4:00"},
+				// {joined: "Britney Kerluke"},
+				// {nickname: "Adela Corwin", avatar: "https://placekitten.com/100/100?image=0", message: "sad fasd fasd fsadf sdaf", time: "4:01"}
+			]
+
+			// this.state.socket.on('chat message', mes => callback(null, mes));
+		};_this.state.socket.emit('add user', _this.state.nickname);
 
 		recieveMessage(function (err, message) {
 			var messages = _this.state.messages;
@@ -120083,6 +120107,42 @@ var Chat = function (_React$Component) {
 			});
 		});
 
+		welcomeUser(function (err, nickname) {
+			if (_this.state.nickname !== nickname) {
+				var messages = _this.state.messages;
+				messages.push({ joined: nickname });
+
+				_this.setState({
+					messages: messages
+				});
+			}
+		});
+
+		// showTyping((err, nickname) => {
+		// 	if (this.state.nickname !== nickname) {
+		// 		let typists = this.state.typists;
+
+		// 		typists.append(nickname);
+
+		// 		this.setState({
+		// 			typists: typists 
+		// 		})
+		// 	}
+		// });
+
+		// hideTyping((err, nickname) => {
+		// 	// if (this.state.nickname !== nickname) {
+		// 		let typists = this.state.typists;
+
+		// 		// typists.append(nickname);
+		// 		delete typists.nickname;
+
+		// 		this.setState({
+		// 			typists: typists 
+		// 		})
+		// 	// }
+		// });
+
 		return _this;
 	}
 
@@ -120091,32 +120151,62 @@ var Chat = function (_React$Component) {
 		value: function renderMessages(messages) {
 			var renderedMessages = [];
 			for (var i = 0; i < messages.length; i++) {
-				var autorFlag = messages[i].nickname === this.state.nickname ? 'chat__message--autor' : '';
-				var signature = autorFlag ? 'Вы' : messages[i].nickname;
-				signature = signature + ' в ' + messages[i].time;
+				if (!!messages[i].joined) {
+					renderedMessages.push(__WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(
+						'div',
+						{ key: i, className: 'chat__notifier' },
+						__WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(
+							'div',
+							{ className: 'chat__notifier-inner' },
+							messages[i].joined,
+							' \u043F\u0440\u0438\u0441\u043E\u0435\u0434\u0438\u043D\u0438\u043B\u0441\u044F \u043A \u0431\u0435\u0441\u0435\u0434\u0435'
+						)
+					));
+				} else {
+					var autorFlag = messages[i].nickname === this.state.nickname ? 'chat__message--autor' : '';
+					var signature = autorFlag ? 'Вы' : messages[i].nickname;
+					signature = signature + ' в ' + messages[i].time;
 
-				renderedMessages.push(
-				// chat__message--autor
-				__WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(
-					'div',
-					{ key: i, className: 'chat__message ' + autorFlag },
+					renderedMessages.push(
+					// chat__message--autor
 					__WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(
 						'div',
-						{ className: 'chat__avatar' },
-						__WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(SvgCrop, { path: messages[i].avatar })
-					),
-					__WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(
-						'div',
-						{ className: 'chat__baloon', 'data-info': signature },
-						messages[i].message
-					)
-				));
+						{ key: i, className: 'chat__message ' + autorFlag },
+						__WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(
+							'div',
+							{ className: 'chat__avatar' },
+							__WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(SvgCrop, { path: messages[i].avatar })
+						),
+						__WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(
+							'div',
+							{ className: 'chat__baloon', 'data-info': signature },
+							messages[i].message
+						)
+					));
+				}
 			}
 			return renderedMessages;
 		}
 	}, {
+		key: 'scrollToBottom',
+		value: function scrollToBottom() {
+			this.messagesEnd.scrollIntoView({ behavior: "smooth" });
+		}
+	}, {
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			this.scrollToBottom();
+		}
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			this.scrollToBottom();
+		}
+	}, {
 		key: 'render',
 		value: function render() {
+			var _this2 = this;
+
 			var messages = this.renderMessages(this.state.messages);
 			return __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(
 				'div',
@@ -120124,7 +120214,11 @@ var Chat = function (_React$Component) {
 				__WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(
 					'div',
 					{ className: 'chat__messages-area' },
-					messages
+					messages,
+					__WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement('div', { style: { float: "left", clear: "both" },
+						ref: function ref(el) {
+							_this2.messagesEnd = el;
+						} })
 				),
 				__WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__MessageForm_js__["a" /* default */], { nickname: this.state.nickname, avatar: this.state.avatar, socket: this.state.socket })
 			);
@@ -120185,10 +120279,11 @@ var MessageForm = function (_React$Component) {
 
     var _this = _possibleConstructorReturn(this, (MessageForm.__proto__ || Object.getPrototypeOf(MessageForm)).call(this, props));
 
-    _this.state = { value: '' };
+    _this.state = { value: '', typing: false };
 
     _this.handleChange = _this.handleChange.bind(_this);
     _this.handleSubmit = _this.handleSubmit.bind(_this);
+    _this.handleTyping = _this.handleTyping.bind(_this);
     return _this;
   }
 
@@ -120220,6 +120315,32 @@ var MessageForm = function (_React$Component) {
       event.preventDefault();
     }
   }, {
+    key: 'handleTyping',
+    value: function handleTyping() {
+      var _this2 = this;
+
+      console.log('keypress');
+
+      if (!this.state.typing) {
+        this.props.socket.emit('typing', this.props.nickname);
+      }
+
+      var typingTimeout = setTimeout(function () {
+        console.log('cleared');
+        _this2.setState({
+          'typing': false
+        });
+        _this2.props.socket.emit('done typing', _this2.props.nickname);
+      }, 3000);
+
+      clearTimeout(this.state.typingClock);
+
+      this.setState({
+        typingClock: typingTimeout,
+        'typing': true
+      });
+    }
+  }, {
     key: 'render',
     value: function render() {
       return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
@@ -120228,7 +120349,7 @@ var MessageForm = function (_React$Component) {
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           'form',
           { onSubmit: this.handleSubmit, className: 'chat__input-area' },
-          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('textarea', { className: 'textarea', value: this.state.value, onChange: this.handleChange, placeholder: '\u041D\u0430\u043F\u0438\u0448\u0438\u0442\u0435 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435...' }),
+          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('textarea', { className: 'textarea', value: this.state.value, onChange: this.handleChange, onKeyDown: this.handleTyping, placeholder: '\u041D\u0430\u043F\u0438\u0448\u0438\u0442\u0435 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435...' }),
           __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             'button',
             { type: 'submit', className: 'button' },

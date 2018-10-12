@@ -401,6 +401,8 @@ body {
 .chat__messages-area {
   height: 80%;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .chat__input-area {
@@ -443,6 +445,38 @@ body {
 
 .chat__message--autor .chat__baloon:before {
   text-align: left;
+}
+
+.chat__notifier {
+  text-align: center;
+}
+
+.chat__notifier-inner {
+  color: #fff;
+  font-size: 14px;
+  padding: 25px 0;
+  display: inline-block;
+  position: relative;
+}
+
+.chat__notifier-inner:before {
+  content: ' ';
+  position: absolute;
+  width: 100vw;
+  height: 1px;
+  background-color: #fff;
+  top: 50%;
+  left: 105%;
+}
+
+.chat__notifier-inner:after {
+  content: ' ';
+  position: absolute;
+  width: 100vw;
+  height: 1px;
+  background-color: #fff;
+  top: 50%;
+  right: 105%;
 }
 
 .chat__baloon {

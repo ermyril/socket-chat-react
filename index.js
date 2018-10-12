@@ -20,17 +20,46 @@ app.get('/message.wav', function (req, res) {
 
 
 io.on('connection', function(socket){
+    var addedUser = false;
+
     console.log('a user connected');
 
     socket.on('disconnect', function(){
         console.log('user disconnected');
     });
 
+    socket.on('typing', function(usr){
+        console.log(usr + 'is typing');
+        socket.broadcast.emit('user typing', socket.username);
+    });
+
+    socket.on('done typing', function(){
+        console.log('user not typing');
+        socket.broadcast.emit('user done typing', socket.username);
+    });
+
+
     socket.on('chat message', function(msg){
         console.log('message: ' + msg);
         io.emit('chat message', msg);
     });
+
+    // when the client emits 'add user', this listens and executes
+      socket.on('add user', (username) => {
+        console.log('user joined ' + username);
+        if (addedUser) return;
+
+        // we store the username in the socket session for this client
+        socket.username = username;
+
+        addedUser = true;
+
+        // echo globally (all clients) that a person has connected
+        socket.broadcast.emit('user joined', socket.username);
+  });
 });
+
+
 
 http.listen(3000, function(){
     console.log('listening on *:3000');

@@ -3,8 +3,20 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 app.get('/', function(req, res){
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(__dirname + '/dist/index.html');
 })
+app.get('/js', function (req, res) {
+  res.sendFile(__dirname + '/dist/app.js');
+});
+app.get('/css', function (req, res) {
+  res.sendFile(__dirname + '/dist/app.css');
+});
+app.get('/bg', function (req, res) {
+  res.sendFile(__dirname + '/dist/background.jpg');
+});
+app.get('/message.wav', function (req, res) {
+  res.sendFile(__dirname + '/dist/message.wav');
+});
 
 
 io.on('connection', function(socket){
